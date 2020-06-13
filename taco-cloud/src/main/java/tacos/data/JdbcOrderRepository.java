@@ -1,6 +1,8 @@
 package tacos.data;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Repository
 public class JdbcOrderRepository implements OrderRepository {
     private SimpleJdbcInsert orderInserter;
@@ -31,25 +34,26 @@ public class JdbcOrderRepository implements OrderRepository {
 
     @Override
     public Order save(Order order) {
+        log.info("Order Save");
         order.setPlacedAt(new Date());
         long orderId = saveOrderDetails(order);
         order.setId(orderId);
         List<Taco> tacos = order.getTacos();
 
         for (Taco taco : tacos) {
-
+            saveTacoToOrder(taco, orderId);
         }
-        return null;
+        return order;
     }
 
     private long saveOrderDetails(Order order) {
         @SuppressWarnings("unchecked")
         Map<String, Object> values = objectMapper.convertValue(order, Map.class);
+        log.info("Order deliveryName: ", values.get("deliveryName"));
         values.put("placedAt", order.getPlacedAt());
 
-        long orderId = orderInserter.executeAndReturnKey(values)
+        return orderInserter.executeAndReturnKey(values)
                                     .longValue();
-        return orderId;
     }
 
     private void saveTacoToOrder(Taco taco, long orderId) {
