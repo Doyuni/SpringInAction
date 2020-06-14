@@ -4,6 +4,8 @@ import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 import org.hibernate.validator.constraints.CreditCardNumber;
 
 import lombok.Data;
@@ -34,6 +36,7 @@ public class Order implements Serializable {
 	private String deliveryCity;
 	
 	@NotBlank(message="State is required")
+	@Size(max=2, message = "Max Length of state must be 2")
 	private String deliveryState;
 	
 	@NotBlank(message="Zip code is required")
